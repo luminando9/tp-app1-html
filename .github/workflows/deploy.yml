@@ -22,7 +22,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           source: "index.html"
-          target: "/var/www/app/"
+          target: "/tmp/"
 
       - name: Setup Nginx and restart service
         uses: appleboy/ssh-action@v1.2.0
@@ -33,5 +33,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             sudo mkdir -p /var/www/app
-            sudo cp /var/www/app/index.html /var/www/app/index.html
+            sudo mv /tmp/index.html /var/www/app/index.html
+            sudo chown -R $USER:$USER /var/www/app
+            sudo chmod -R 755 /var/www/app
             sudo systemctl restart nginx
