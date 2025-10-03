@@ -1,0 +1,53 @@
+name: CI/CD LAMP
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+
+jobs:
+  ci-cd:
+    runs-on: ubuntu-latest
+
+    env:
+      WP_DB_USER: user
+      WP_DB_PASSWORD: poseidon
+      WP_DB_NAME: wordpress
+      WP_DB_HOST: db:3306
+      DOCKER_IMAGE: aracnido/tp-app1-html:latest
+
+    steps:
+      - name: Vérification du code
+        uses: actions/checkout@v4
+
+      - name: Configuration Docker
+        run: |
+          docker --version
+          docker compose version || true
+
+      - name: Configure docker-compose.yml
+        run: |
+          cat > docker-compose.yml <<'EOF'
+          version: '3.8'
+          services:
+            db:
+              container_name: db
+              image: mysql:8.0
+              environment:
+                MYSQL_DATABASE: wordpress
+                MYSQL_USER: user
+                MYSQL_PASSWORD: poseidon
+                MYSQL_ROOT_PASSWORD: poseidon
+              ports:
+                - "3306:3306"
+              healthcheck:
+                test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+                interval: 5s
+                retries: 5
+
+            wordpress:
+              image: wordpress:latest
+              depends_on:
+                db:
+                  condition: service_healthy
+              ports:
