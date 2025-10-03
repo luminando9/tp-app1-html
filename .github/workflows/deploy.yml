@@ -14,15 +14,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Copy files with SCP
+      - name: Copy index.html with SCP
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          source: "./"
-          target: "/var/www/app"
+          source: "index.html"
+          target: "/var/www/app/"
 
       - name: Setup Nginx and restart service
         uses: appleboy/ssh-action@v1.2.0
@@ -32,27 +32,6 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            if ! command -v nginx >/dev/null 2>&1; then
-              sudo apt update -y
-              sudo apt install -y nginx
-            fi
-
             sudo mkdir -p /var/www/app
-            sudo chown -R $USER:$USER /var/www/app
-
-            sudo tee /etc/nginx/sites-available/app > /dev/null <<EOF
-            server {
-                listen 80;
-                server_name _;
-                root /var/www/app;
-
-                index index.html;
-                location / {
-                    try_files \$uri \$uri/ =404;
-                }
-            }
-            EOF
-
-            sudo ln -sf /etc/nginx/sites-available/app /etc/nginx/sites-enabled/app
-            sudo nginx -t
+            sudo cp /var/www/app/index.html /var/www/app/index.html
             sudo systemctl restart nginx
