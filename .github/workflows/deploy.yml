@@ -1,0 +1,24 @@
+name: Deploy HTML to Hetzner
+
+on:
+  push:
+    branches:
+      - main   # ejecuta cuando haces push en la rama main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Deploy HTML files to Hetzner
+        run: |
+          ssh -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "mkdir -p /var/www/html"
+          scp -P ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no index.html ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/html/
