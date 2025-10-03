@@ -1,4 +1,4 @@
-name: Déploiement sous Nginx v5
+name: Déploiement sous Nginx v6
 
 on:
   push:
@@ -32,4 +32,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            systemctl --user restart nginx || echo "⚠️ Nginx needs root, skipping restart"
+            sudo systemctl restart nginx || echo "⚠️ Error al reiniciar Nginx"
